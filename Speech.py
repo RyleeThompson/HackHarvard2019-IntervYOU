@@ -20,7 +20,7 @@ from pydub import AudioSegment
 import shutil
 
 class audioInput:
-    def getAudioAnswer(self, answer, q, CHUNK = 2048, FORMAT = pyaudio.paInt16, CHANNELS = 2, RATE = 48000, RECORD_SECONDS = 1):
+    def getAudioAnswer(self, answer, q, CHUNK = 2048, FORMAT = pyaudio.paInt16, CHANNELS = 2, RATE = 48000, RECORD_SECONDS = 1000):
         p = pyaudio.PyAudio()
 
         stream = p.open(format=FORMAT,
@@ -36,6 +36,7 @@ class audioInput:
         counter = 0
         started = 0
         part = 1
+        max_mean = 500
 
         for j in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
             #read data from mic
@@ -53,9 +54,11 @@ class audioInput:
             audio = AudioSegment.from_file(r'audio\notUsed' + str(j) + '.wav')
             x = np.abs(audio.get_array_of_samples())/2
             mean = np.mean(x)
+            #print(mean)
+            means = np.append(means, mean)
 
             #Only append data if the interviewee has begun answering
-            if started == 0 and mean > 250:
+            if started == 0 and mean > max_mean:
                 started = 1
                 j = 0
             if j % 702 == 0 and j != 0 and started == 1:
@@ -70,7 +73,8 @@ class audioInput:
             if started == 1:
                 frames.append(data)
             means = np.append(means, np.mean(x))
-            if mean <= 250:
+            #print(means)
+            if mean <= max_mean and started == 1:
                 counter += 1
             else:
                 counter = 0
@@ -91,6 +95,7 @@ class audioInput:
         wf1.close()
         shutil.rmtree('audio')
         q.put('Done')
+       # print(np.mean(means))
         return part
 
     #Gets the audio input for a given number of questions

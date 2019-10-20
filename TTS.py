@@ -17,7 +17,7 @@ class TTSpeech:
         # voice gender ("neutral")
         voice = texttospeech.types.VoiceSelectionParams(
             language_code='en-US',
-            ssml_gender=texttospeech.enums.SsmlVoiceGender.NEUTRAL)
+            ssml_gender=texttospeech.enums.SsmlVoiceGender.FEMALE)
 
         # Select the type of audio file you want returned
         audio_config = texttospeech.types.AudioConfig(
@@ -42,5 +42,5 @@ class TTSpeech:
             frames = f.getnframes()
             rate = f.getframerate()
             duration = frames / float(rate)
-        time.sleep(duration)
+        time.sleep(duration + 0.2)
         q.put('done')

@@ -3,6 +3,7 @@ import os
 import contextlib
 import wave
 from pydub import AudioSegment
+import time
 
 class TTSpeech:
     def __init__(self):
@@ -16,7 +17,7 @@ class TTSpeech:
         # voice gender ("neutral")
         voice = texttospeech.types.VoiceSelectionParams(
             language_code='en-US',
-            ssml_gender=texttospeech.enums.SsmlVoiceGender.NEUTRAL)
+            ssml_gender=texttospeech.enums.SsmlVoiceGender.FEMALE)
 
         # Select the type of audio file you want returned
         audio_config = texttospeech.types.AudioConfig(
@@ -34,12 +35,12 @@ class TTSpeech:
         os.startfile(os.getcwd() + r'\output.mp3')
         q.put('done')
     
-    def findDelay(self):
+    def delay(self, q):
         audio = AudioSegment.from_file("output.mp3")
         audio.export(os.getcwd() + '\output.wav', format = 'wav')
         with contextlib.closing(wave.open(os.getcwd() + r'\output.wav', 'r')) as f:
             frames = f.getnframes()
             rate = f.getframerate()
             duration = frames / float(rate)
-            print(duration)
-            return duration
+        time.sleep(duration + 0.2)
+        q.put('done')
